@@ -218,7 +218,49 @@ class HitchManager
    */
   public function marshall($object)
   {
-    throw new Exception("Not implemented yet");
+  	
+  	$rootClass = get_class($object);
+  	$metadata = $this->classMetadataFactory->getClassMetadata($rootClass);
+	$rootElement = strtolower($this->getClassNameWithoutNamespace($rootClass));
+
+  	//FIXME remove me
+ 	var_dump($metadata);
+	
+
+ 	$xml = new SimpleXMLElement("<$rootElement></$rootElement>");
+
+ 	foreach ($metadata->getElements() as $element => $el)
+ 	{
+ 		// Try something with call_user_function or simmilar
+ 		$xml->addChild($element, $object->{'get'. ucfirst($element)()});
+ 	}
+  	
+  	return $xml->asXML();
+  }
+  
+  private function getClassNameWithoutNamespace($class)
+  {
+  	  $parts = explode("\\", $class);
+      return $parts[count($parts) - 1];
+  }
+  
+  private function createElementWithAttributesAndValue($object, $name, $attributes, $value)
+  {
+  	$xml = new SimpleXMLElement("<$name></$name>");
+  	
+  	if (isset($attributes) && is_array($attributes) && count($attributes) > 0) 
+  	{
+  		foreach ($attributes as $key)
+  		{
+  			$xml->addAttribute($key, $object->$key);
+  		}
+  	}
+  	
+  	if (isset($value))
+  	{
+//         $xml-
+  	}
+    
   }
 
   /**
