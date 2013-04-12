@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modelcomplex>
+	<id>1</id>
+	<name>test complex model</name>
+	<description>this is a complex model</description>
+    <attribute>
+      <id>1</id>
+      <name>test attribute</name>
+      <description>this is a test attribute</description>
+    </attribute>
+</modelcomplex>

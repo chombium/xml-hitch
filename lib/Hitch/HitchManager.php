@@ -224,45 +224,111 @@ class HitchManager
 	$rootElement = strtolower($this->getClassNameWithoutNamespace($rootClass));
 
   	//FIXME remove me
- 	var_dump($metadata);
+	var_dump($metadata);
 	
-
- 	$xml = new SimpleXMLElement("<$rootElement></$rootElement>");
-
- 	foreach ($metadata->getElements() as $element => $el)
- 	{
- 		// Try something with call_user_function or simmilar
- 		$xml->addChild($element, $object->{'get'. ucfirst($element)()});
- 	}
-  	
+	$xml = $this->createXmlElement($object, $metadata, $rootClass);
+	
+	
   	return $xml->asXML();
   }
   
   private function getClassNameWithoutNamespace($class)
   {
+
+      //FIXME ova ne raboti
+      if (strpos('\\', $class) == false)
+      {
+          return $class;
+      }
   	  $parts = explode("\\", $class);
       return $parts[count($parts) - 1];
   }
   
-  private function createElementWithAttributesAndValue($object, $name, $attributes, $value)
+  /**
+   * Creates an XML element
+   * @param unknown $object
+   * @param string $metadata
+   * @param string $rootClass
+   * @return unknown
+   */
+  private function createXmlElement($object, $metadata = null, $rootClass = null)
   {
-  	$xml = new SimpleXMLElement("<$name></$name>");
-  	
-  	if (isset($attributes) && is_array($attributes) && count($attributes) > 0) 
-  	{
-  		foreach ($attributes as $key)
-  		{
-  			$xml->addAttribute($key, $object->$key);
-  		}
-  	}
-  	
-  	if (isset($value))
-  	{
-//         $xml-
-  	}
-    
-  }
+      if (!$rootClass)
+      {
+          $rootClass = get_class($object);
+          $metadata = $this->classMetadataFactory->getClassMetadata($rootClass);
+      }
+      
+      $rootElement = strtolower($this->getClassNameWithoutNamespace($rootClass));
+      $valueProperty = $metadata->getValue();
 
+      $xml = $this->createXmlElementWithValue($object, $rootElement, $valueProperty);
+      $xml = $this->createAttribites($xml, $object, $metadata);
+    //  $xml = $this->createElements($xml, $object, $metadata);
+      
+      return $xml;
+  }
+  
+  /**
+   * Creates the child elements of an XML node
+   * @param unknown $xml
+   * @param unknown $object
+   * @param unknown $metadata
+   * @return unknown
+   */
+  private function createElements($xml, $object, $metadata) 
+  {
+      foreach ($metadata->getElements() as $property => $el)
+      {
+          
+          $xml->addChild($property, $this->getPropertyValue($object, $property));
+      }
+
+      return $xml;
+  }
+  
+  private function createAttribites($xml, $object, $metadata) 
+  {
+     // TODO Implement me
+    /*
+      foreach ($metadata->getAttributes() as $attr)
+      {
+      }
+    */  
+      return $xml;
+  }
+  
+  /**
+   * Creates an XML element
+   * @param unknown $object
+   * @param unknown $rootElement
+   * @param string $valueProperty
+   * @return \SimpleXmlElement
+   */
+  private function createXmlElementWithValue($object, $element, $valueProperty = null)
+  {
+      var_dump($element);
+      die();
+      if (! is_null($valueProperty))
+      {
+          $xml = new SimpleXMLElement("<$element>" .
+                     $this->getPropertyValue($object, $valueProperty) .
+                     "</$element>");
+      }
+      else
+      {
+          $xml = new SimpleXMLElement("<$element></$element>");
+      }
+      
+      return $xml;
+  }
+  
+  private function getPropertyValue($object, $property)
+  {
+      $methodName = 'get'. ucfirst($property);
+      return call_user_func(array($object, $methodName));
+  }
+  
   /**
    * Set the ClassMetadataFactory
    * 
