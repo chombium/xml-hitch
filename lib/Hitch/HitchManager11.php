@@ -220,23 +220,18 @@ class HitchManager
    */
   public function marshall($object)
   {
+  
     $rootClass = get_class($object);
     $metadata = $this->classMetadataFactory->getClassMetadata($rootClass);
     $rootElement = strtolower($this->getClassNameWithoutNamespace($rootClass));
-    
-    $xmlDoc = new DOMDocument('1.0', 'UTF-8');
-    $xmlDoc->formatOutput = true;
 
-    $rootNode = $xmlDoc->appendChild(
+    //FIXME remove me
+    //var_dump($metadata);
 
-    $this->createXmlElement(
-            $xmlDoc,
-            $object,
-            $rootElement));
-    
-    $this->createXmlNode($object, $metadata, $xmlDoc, $rootNode);
+    $xml = $this->createXml($object, $metadata, $rootClass);
 
-    return $xmlDoc->saveXml();
+
+   return $xml->asXML();
   }
   
   /**
@@ -255,99 +250,99 @@ class HitchManager
       return $parts[count($parts) - 1];
   }
   
-  private function getPropertyValue($object, $property)
+  /**
+   * Examines an object and creates an xml representation
+   * @param mixed $object the object to be examined
+   * @return \DOMNode the generated node
+   */
+  private function createXml($object, $metadata = null, $rootClass = null)
   {
-      $methodName = 'get'. ucfirst($property);
-      return call_user_func(array($object, $methodName));
-  }
-  
-  private function createXmlNode($object, $metadata, $xmlDoc, $node = null) 
-  {
-      if (is_null($node))
+      if (!$rootClass)
       {
-          $class = get_class($object);
-          $metadata = $this->classMetadataFactory->getClassMetadata($class);
-          $element = strtolower($this->getClassNameWithoutNamespace($class));
-          $valueProperty = $metadata->getValue();
-          $node = $this->createXmlElement($xmlDoc, $object, $element, $valueProperty);
+          $rootClass = get_class($object);
+          $metadata = $this->classMetadataFactory->getClassMetadata($rootClass);
       }
       
-      // add elements
-      $this->createElements($xmlDoc, $node, $object, $metadata);
+      $element = strtolower($this->getClassNameWithoutNamespace($rootClass));
+      $valueProperty = $metadata->getValue();
       
-      // add attributes
-      $this->createAttribites($xmlDoc, $node, $object, $metadata);
-      
-      // add embedds
-      $this->createEmbeds($xmlDoc, $node, $object, $metadata);
+      // create element
+      $xml = $this->createXmlElement($object, $element, $valueProperty);
 
-      // add lists
-      $this->createLists($xmlDoc, $node, $object, $metadata);
+      // add attributes
+      $xml = $this->createAttribites($xml, $object, $metadata);
+
+      // add elements
+      $xml = $this->createElements($xml, $object, $metadata);
+
+      // process embedds
+      $xml = $this->createEmbeds($xml, $object, $metadata);
+      // process lists
+      
+      return $xml;
   }
   
   /**
    * Creates an XML element
    * @param unknown $object
-   * @param unknown $rootElement
-   * @param string $valueProperty
+   * @param string $metadata
+   * @param string $rootClass
+   * @return unknown
    */
-  private function createXmlElement($xmlDoc, $object, 
-          $element, $valueProperty = null)
+  private function createXmlDocument($xmlDoc, $object, $metadata = null, $rootClass = null)
   {
-      if (! is_null($valueProperty))
+      if (!$rootClass)
       {
-          return $xmlDoc->createElement(
-                     $element,
-                     $this->getPropertyValue($object, $valueProperty));
+          $rootClass = get_class($object);
+          $metadata = $this->classMetadataFactory->getClassMetadata($rootClass);
       }
-      else
-      {
-          return $xmlDoc->createElement($element);
-      }
+      
+      $rootElement = strtolower($this->getClassNameWithoutNamespace($rootClass));
+      $valueProperty = $metadata->getValue();
+
+      $xmlDoc = $this->createXmlElementWithValue($xmlDoc, $object, $rootElement, $valueProperty);
+      
+//       $xmlDoc = $this->createAttribites($xmlDoc, $object, $metadata);
+//       $xmlDoc = $this->createElements($xmlDoc, $object, $metadata);
+//       $xmlDoc = $this->createEmbeds($xmlDoc, $object, $metadata);
+      
+      return $xmlDoc;
   }
   
   /**
    * Creates the child elements of an XML node
-   * @param unknown $xmlDoc
-   * @param unknown $node
-   * @param unknown $object
-   * @param unknown $metadata
-   */
-  private function createElements($xmlDoc, $node, $object, $metadata)
-  {
-      foreach ($metadata->getElements() as $property)
-      {
-          $node->appendChild(
-              $this->createXmlElement(
-                  $xmlDoc,
-                  $object, 
-                  $property,
-                  $property
-          ));
-      }
-  }
-  
-  /**
-   * Creates node attributes
-   * @param unknown $xmlDoc
-   * @param unknown $node
+   * @param unknown $xml
    * @param unknown $object
    * @param unknown $metadata
    * @return unknown
    */
-  private function createAttribites($xmlDoc, $node, $object, $metadata)
+  private function createElements($xml, $object, $metadata) 
+  {
+      foreach ($metadata->getElements() as $property)
+      {
+          $xml->addChild($property, $this->getPropertyValue($object, $property));
+      }
+
+      return $xml;
+  }
+  
+  /**
+   * Creates node attributes
+   * @param unknown $xml
+   * @param unknown $object
+   * @param unknown $metadata
+   * @return unknown
+   */
+  private function createAttribites($xml, $object, $metadata) 
   {
       foreach ($metadata->getAttributes() as $attribute)
       {
-          $node->appendChild($xmlDoc
-          ->createAttribute($attribute[0]))
-          ->appendChild($xmlDoc
-                  ->createTextNode($this
-                      ->getPropertyValue($object, $attribute[0])));
+          $xml->addAttribute($attribute[0], $this->getPropertyValue($object, $attribute[0]));
+          
       }
+      return $xml;
   }
-  
-  
+
   /**
    * Creates embedded objects
    * @param unknown $xml
@@ -355,49 +350,53 @@ class HitchManager
    * @param unknown $metadata
    * @return unknown
    */
-  private function createEmbeds($xmlDoc, $node, $object, $metadata)
+  private function createEmbeds($xml, $object, $metadata)
   {
+      var_dump($xml->asXml());
+         
+          
       foreach ($metadata->getEmbeds() as $embed)
       {
-          
-          $embeddedMetadata = $this->classMetadataFactory
-              ->getClassMetadata($embed[1]->getClassName());
           $embeddedObject = $this->getPropertyValue($object, $embed[0]);
-          $embeddedNode = $this->createXmlElement(
-              $xmlDoc, 
-              $embeddedObject, 
-              $embed[0], 
-              $embeddedMetadata->getValue());
-          if (! is_null($embeddedObject))
-          {
-              $this->createXmlNode($embeddedObject, 
-                  $embeddedMetadata, 
-                  $xmlDoc, 
-                  $embeddedNode, 
-                  $node);
-          }
-          $node->appendChild($embeddedNode);
+          var_dump($embeddedObject);
+          
+          $embeddedNode = $xml->addChild($embed[0]);
+          
+          $xml = $this->createElements($embeddedNode, $embeddedObject, $metadata)
+          
+          var_dump($xml->asXml());
+          
       }
+      
+      return $xml;
+  }
+    
+  /**
+   * Creates an XML element
+   * @param unknown $object
+   * @param unknown $rootElement
+   * @param string $valueProperty
+   */
+  private function createXmlElement($object, $element, $valueProperty = null)
+  {
+      if (! is_null($valueProperty))
+      {
+          $xml = new SimpleXMLElement("<$element>" .
+                     $this->getPropertyValue($object, $valueProperty) .
+                     "</$element>");
+      }
+      else
+      {
+          $xml = new SimpleXMLElement("<$element></$element>");
+      }
+      
+      return $xml;
   }
   
-  private function createLists($xmlDoc, $node, $object, $metadata)
+  private function getPropertyValue($object, $property)
   {
-      foreach ($metadata->getLists() as $listNodeName => $list)
-      {
-          $listObjectArray = $this->getPropertyValue($object, $list[0]);
-
-          $wrapperNode = $this->createXmlElement($xmlDoc, $object, $list[1]);
-          $node->appendChild($wrapperNode);
-          
-          foreach ($listObjectArray as $listObject)
-          {
-              $listNode = $this->createXmlElement($xmlDoc, $listObject, $listNodeName);
-              $listNodeMetadata = $this->classMetadataFactory->getClassMetadata($list[2]->getClassName());
-              $this->createXmlNode($listObject, $listNodeMetadata, $xmlDoc, 
-                  $listNode);
-              $wrapperNode->appendChild($listNode);
-          }
-      }
+      $methodName = 'get'. ucfirst($property);
+      return call_user_func(array($object, $methodName));
   }
   
   /**

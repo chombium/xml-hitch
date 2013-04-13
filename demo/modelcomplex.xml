@@ -7,5 +7,23 @@
       <id>1</id>
       <name>test attribute</name>
       <description>this is a test attribute</description>
+    sdfsdfsd
     </attribute>
+    <many>
+      <category>
+        <id>1</id>
+        <name>test category</name>
+        <description>this is a test category</description>
+      </category>
+      <category>
+        <id>1</id>
+        <name>test category</name>
+        <description>this is a test category</description>
+      </category>
+      <category>
+        <id>1</id>
+        <name>test category</name>
+        <description>this is a test category</description>
+      </category>
+    </many>
 </modelcomplex>

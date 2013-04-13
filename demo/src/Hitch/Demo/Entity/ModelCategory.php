@@ -4,7 +4,7 @@ namespace Hitch\Demo\Entity;
 /**
  * @xml:XmlObject
  */
-class ModelAttributeWithValue
+class ModelCategory
 {
     /**
      * @xml:XmlElement
@@ -20,11 +20,6 @@ class ModelAttributeWithValue
      * @xml:XmlElement
      */
     protected $description;
-    
-    /**
-     * @xml:XmlValue
-     */
-    protected $value;
     
     public function getId()
     {
@@ -54,14 +49,5 @@ class ModelAttributeWithValue
     public function setDescription($description)
     {
         $this->description = $description;
-    }
-    
-    public function getValue() 
-    {
-        return $this->value;
-    }
-    
-    public function setValue($value) {
-        $this->value = $value;
     }
 }

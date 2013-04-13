@@ -44,16 +44,19 @@ $hitch->setClassMetaDataFactory(new ClassMetadataFactory(new AnnotationLoader(ne
 
 // pre-build the class meta data cache
 $hitch->registerRootClass('Hitch\\Demo\\Entity\\ModelComplex');
+// $hitch->registerRootClass('Hitch\\Demo\\Entity\\ModelAttributeComplex');
+// $hitch->registerRootClass('Hitch\\Demo\\Entity\\ModelCategory');
 $hitch->buildClassMetaDatas();
 
 // load XML file to parse
 $xml = file_get_contents("modelcomplex.xml");
 
-print_r($xml);
+//  print_r($xml);
 echo "\n===========\n";
 
 // parse the xml into a Catalog object
 $model = $hitch->unmarshall($xml, 'Hitch\\Demo\\Entity\\ModelComplex');
-print_r($model);
+// print_r($model);
 
-print_r($hitch->marshall($model));
+$result = $hitch->marshall($model);
+print_r($result);

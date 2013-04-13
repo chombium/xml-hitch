@@ -4,7 +4,7 @@ namespace Hitch\Demo\Entity;
 /**
  * @xml:XmlObject
  */
-class ModelComplex
+class ModelAttributeComplex
 {
     /**
      * @xml:XmlElement
@@ -20,16 +20,20 @@ class ModelComplex
      * @xml:XmlElement
      */
     protected $description;
-   
-    /**
-     * @xml:XmlElement(name="attribute", type="Hitch\Demo\Entity\ModelAttributeComplex")
-     */
-    protected $attribute;
     
     /**
-     * @xml:XmlList(name="category", wrapper="many", type="Hitch\Demo\Entity\ModelCategory")
+     * @xml:XmlAttribute
      */
-    protected $categories;
+    protected $group;
+    /**
+     * @xml:XmlAttribute
+     */
+    protected $creator;
+    
+    /**
+     * @xml:XmlValue
+     */
+//     protected $value;
     
     public function getId()
     {
@@ -61,23 +65,33 @@ class ModelComplex
         $this->description = $description;
     }
     
-    public function getAttribute() 
+    public function getGroup() 
     {
-        return $this->attribute;
+        return $this->group;
     }
     
-    public function setAttribute($attribute) 
+    public function setGroup($group)
     {
-        $this->attribute = $attribute;
+        $this->group = $group;
     }
     
-    public function getCategories() 
+    public function getCreator()
     {
-        return $this->categories;
+        return $this->creator;
     }
     
-    public function setCategories($categories) 
+    public function setCreator($creator)
     {
-        $this->categories = $categories;
+        $this->creator = $creator;
+    }
+    
+    public function getValue() 
+    {
+        return $this->value;
+    }
+    
+    public function setValue($value) 
+    {
+        $this->value = trim($value);
     }
 }

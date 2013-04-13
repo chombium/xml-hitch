@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<attribute group="group" creator="Pero">
+    <id>1</id>
+    <name>test complex attribute</name>
+    <description>this is a test attribute</description>
+    Attribute Value
+</attribute>
