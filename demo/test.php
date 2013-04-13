@@ -51,7 +51,7 @@ $hitch->buildClassMetaDatas();
 // load XML file to parse
 $xml = file_get_contents("modelcomplex.xml");
 
-//  print_r($xml);
+print_r($xml);
 echo "\n===========\n";
 
 // parse the xml into a Catalog object

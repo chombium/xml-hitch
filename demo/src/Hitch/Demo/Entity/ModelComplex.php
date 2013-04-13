@@ -27,7 +27,7 @@ class ModelComplex
     protected $attribute;
     
     /**
-     * @xml:XmlList(name="category", wrapper="many", type="Hitch\Demo\Entity\ModelCategory")
+     * @xml:XmlList(name="category", wrapper="categories", type="Hitch\Demo\Entity\ModelCategory")
      */
     protected $categories;
     

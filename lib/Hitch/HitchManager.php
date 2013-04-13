@@ -395,6 +395,7 @@ class HitchManager
               $listNodeMetadata = $this->classMetadataFactory->getClassMetadata($list[2]->getClassName());
               $this->createXmlNode($listObject, $listNodeMetadata, $xmlDoc, 
                   $listNode);
+              
               $wrapperNode->appendChild($listNode);
           }
       }
