@@ -163,7 +163,7 @@ class HitchManager
   protected function parseLists(\SimpleXmlElement $xml, ClassMetadata $metadata, $obj)
   {
     foreach($metadata->getLists() as $nodeName => $info){
-       
+
       $property = $info[0];
       $wrapperNode = $info[1];
       $listMetadata = $info[2];
@@ -222,7 +222,7 @@ class HitchManager
   {
     $rootClass = get_class($object);
     $metadata = $this->classMetadataFactory->getClassMetadata($rootClass);
-    $rootElement = strtolower($this->getClassNameWithoutNamespace($rootClass));
+    $rootElement = lcfirst($this->getClassNameWithoutNamespace($rootClass));
     
     $xmlDoc = new DOMDocument('1.0', 'UTF-8');
     $xmlDoc->formatOutput = true;
